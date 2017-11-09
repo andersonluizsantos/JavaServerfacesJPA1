@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 
 import com.fuctura.modulo3.model.Produto;
@@ -25,7 +26,7 @@ public class ProdutoBean implements Serializable{
 	
 	private String nome;
 	private Double preco;
-	private Collection<Produto> produtos = new ArrayList<>();
+	private Collection<Produto> produtos = buscarTodos();
 
 	public String salvar() {
 
@@ -37,21 +38,6 @@ public class ProdutoBean implements Serializable{
 		produtos.add(produto);
 		
 		*/
-		
-		/*Produto produto = new Produto();
-		produto.setNome(nome);
-		produto.setPreco(preco);
-		
-		EntityManagerFactory factory = Persistence.createEntityManagerFactory("fucturaPU");
-		EntityManager manager = factory.createEntityManager();
-		EntityTransaction tx = manager.getTransaction();
-		
-		tx.begin();
-		manager.persist(produto);
-		tx.commit();	
-
-		manager.close();
-		factory.close();*/
 		
 		Produto produto = new Produto();
 		produto.setNome(nome);
@@ -87,10 +73,36 @@ public class ProdutoBean implements Serializable{
 	}
 
 	public Collection<Produto> getProdutos() {
-		return produtos;
+		EntityManager em = JpaUtil.getEntityManager();
+		String jpql = "select p from Produto p";
+		Query query = em.createQuery(jpql);
+		return query.getResultList();
+		//return produtos;
 	}
 
 	public void setProdutos(Collection<Produto> produtos) {
 		this.produtos = produtos;
 	}
+	
+	/*public Collection<Produto> buscarTodos() {
+		EntityManager em = JpaUtil.getEntityManager();
+		String jpql = "select p from Produto p";
+		Query query = em.createQuery(jpql);
+		return query.getResultList();
+	}
+	*/
+	public String excluirProdutoPorId(Produto produto, Long id) {
+		EntityManager em = JpaUtil.getEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		tx.begin();
+		produto = em.find(Produto.class, id);
+		em.remove(produto);
+		tx.commit();
+		JpaUtil.close();
+		return "/produto/listar.xhtml";
+	}
+	
+	
+	
+	
 }
